@@ -26,4 +26,8 @@ export class TaskListComponent {
 
     this.tasks = this.taskSerivce.updateTask(updatedTask);
   }
+
+  deleteTask(id: number) {
+    this.tasks = this.taskSerivce.deleteTask(id);
+  }
 }
