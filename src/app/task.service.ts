@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Task } from './task.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+const BASE_URL = 'http://localhost:8080/api';
 
 @Injectable({
   providedIn: 'root'
@@ -41,17 +45,16 @@ export class TaskService {
     }
   ];
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   // getTasks
-  getTasks(): Task[] {
-    return this.tasks;
+  getTasks(): Observable<Task[]> {
+    return this.http.get<Task[]>(`${BASE_URL}/tasks`);
   }
 
   // addTask
-  addTask(task: Task): Task[] {
-    this.tasks.push(task);
-    return this.tasks;
+  addTask(task: Task) {
+    return this.http.post(`${BASE_URL}/tasks`, {...task});
   }
 
   // updateTask
