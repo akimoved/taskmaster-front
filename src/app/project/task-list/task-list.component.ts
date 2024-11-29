@@ -4,6 +4,15 @@ import { Task } from '../../task.model';
 import { DatePipe } from '@angular/common';
 import { TaskFormComponent } from '../task-form/task-form.component';
 
+const emptyTask: Task = {
+  name: "",
+  description: "",
+  dueDate: new Date("1970-01-01"),
+  completed: false,
+  project: 0,
+  id: 0
+}
+
 @Component({
   selector: 'app-task-list',
   standalone: true,
@@ -14,6 +23,8 @@ import { TaskFormComponent } from '../task-form/task-form.component';
 export class TaskListComponent {
   tasks: Task[] = [];
   showModal: boolean = false;
+  selectedTask: Task = emptyTask;
+  formType: "CREATE" | "UPDATE" = "CREATE";
 
   private taskSerivce: TaskService = inject(TaskService);
 
@@ -31,5 +42,11 @@ export class TaskListComponent {
 
   deleteTask(id: number) {
     this.tasks = this.taskSerivce.deleteTask(id);
+  }
+
+  updateTask(task: Task) {
+    this.selectedTask = task;
+    this.formType = "UPDATE";
+    this.showModal = true;
   }
 }
