@@ -1,8 +1,10 @@
 import { TaskService } from './../../task.service';
 import { Component, inject } from '@angular/core';
 import { Task } from '../../task.model';
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { TaskFormComponent } from '../task-form/task-form.component';
+import { Observable } from 'rxjs';
+import { TaskFormUpdateComponent } from "../task-form-update/task-form-update.component";
 
 const emptyTask: Task = {
   name: "",
@@ -16,37 +18,60 @@ const emptyTask: Task = {
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [DatePipe, TaskFormComponent],
+  imports: [DatePipe, TaskFormComponent, AsyncPipe, TaskFormUpdateComponent],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css'
 })
 export class TaskListComponent {
   tasks: Task[] = [];
-  showModal: boolean = false;
+  tasks$!: Observable<Task[]>
+
   selectedTask: Task = emptyTask;
-  formType: "CREATE" | "UPDATE" = "CREATE";
+
+  showAddModal: boolean = false;
+  showUpdateModal: boolean = false;
 
   private taskSerivce: TaskService = inject(TaskService);
 
   constructor() {
-    this.tasks = this.taskSerivce.getTasks();
+    this.updateTasks();
   }
 
-  handleCheckbox(id: number) {
-    const taskIndex: number = this.tasks.findIndex((task) => task.id === id);
-    const updatedTask: Task = this.tasks[taskIndex];
-    updatedTask.completed = !updatedTask.completed;
+  updateTasks() {
+    this.tasks$ = this.taskSerivce.getTasks();
+  }
 
-    this.tasks = this.taskSerivce.updateTask(updatedTask);
+  handleCheckbox(task: Task) {
+    task.completed = !task.completed;
+    this.taskSerivce.updateTask(task).subscribe(() => {
+      this.updateTasks();
+    });
   }
 
   deleteTask(id: number) {
-    this.tasks = this.taskSerivce.deleteTask(id);
+    this.taskSerivce.deleteTask(id).subscribe(() => {
+      this.updateTasks();
+    });
   }
 
   updateTask(task: Task) {
     this.selectedTask = task;
-    this.formType = "UPDATE";
-    this.showModal = true;
+    this.handleUpdateModalOpen();
+  }
+
+  handleAddModalOpen() {
+    this.showAddModal = true;
+  }
+
+  handleUpdateModalOpen() {
+    this.showUpdateModal = true;
+  }
+
+  handleModalClose(type: "SUBMIT" | "CANCEL") {
+    if(type === "SUBMIT") {
+      this.updateTasks();
+    }
+    this.showAddModal = false;
+    this.showUpdateModal = false;
   }
 }

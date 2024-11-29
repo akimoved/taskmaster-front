@@ -10,41 +10,6 @@ const BASE_URL = 'http://localhost:8080/api';
 })
 export class TaskService {
 
-  tasks: Task[] = [
-    {
-      id: 1,
-      name: "Design wireframe",
-      description: "",
-      completed: false,
-      dueDate: new Date("2024-12-12"),
-      project: 1
-    },
-    {
-      id: 2,
-      name: "Develop frontend",
-      description: "",
-      completed: true,
-      dueDate: new Date("2024-10-10"),
-      project: 1
-    },
-    {
-      id: 3,
-      name: "Solve poverty",
-      description: "",
-      completed: false,
-      dueDate: new Date("2024-12-31"),
-      project: 1
-    },
-    {
-      id: 4,
-      name: "Have a party",
-      description: "",
-      completed: true,
-      dueDate: new Date("2025-01-01"),
-      project: 1
-    }
-  ];
-
   constructor(private http: HttpClient) { }
 
   // getTasks
@@ -58,16 +23,12 @@ export class TaskService {
   }
 
   // updateTask
-  updateTask(newTask: Task): Task[] {
-    const taskIndex: number = this.tasks.findIndex((task) => task.id === newTask.id);
-    this.tasks[taskIndex] = newTask;
-    return this.tasks;
+  updateTask(newTask: Task) {
+    return this.http.put(`${BASE_URL}/tasks/${newTask.id}`, {...newTask});
   }
 
   // deleteTask
-  deleteTask(id: number): Task[] {
-    const taskIndex: number = this.tasks.findIndex((task) => task.id === id);
-    this.tasks.splice(taskIndex, 1);
-    return this.tasks;
+  deleteTask(id: number) {
+    return this.http.delete(`${BASE_URL}/tasks/${id}`);
   }
 }

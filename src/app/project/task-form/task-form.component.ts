@@ -11,9 +11,7 @@ import { TaskService } from '../../task.service';
   styleUrl: './task-form.component.css'
 })
 export class TaskFormComponent {
-  @Input() currentTask: Task | null = null;
-  @Input() formType: 'UPDATE' | 'CREATE' = 'CREATE';
-  @Output() closePanel = new EventEmitter<'SUBMIT'>();
+  @Output() closePanel = new EventEmitter<'SUBMIT' | 'CANCEL'>();
 
   taskForm: FormGroup;
 
@@ -24,40 +22,29 @@ export class TaskFormComponent {
       name: ['', Validators.required],
       description: [''],
       dueDate: ['', Validators.required],
-      project: [0]
+      project: [null]
     });
-    console.log(this.formType)
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if(changes['currentTask'] && changes['currentTask'].currentValue) {
-      const task = changes['currentTask'].currentValue as Task;
-
-      const dueDateFormatted = task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : '';
-
-      this.taskForm.patchValue({
-        ...task,
-        dueDate: dueDateFormatted
-      });
-    }
   }
 
   handleSubmit() {
     if(this.taskForm.valid) {
       const newTask: Task = {
         ...this.taskForm.value,
-        id: this.currentTask?.id,
+        id: null,
+        project: null,
         dueDate: new Date(this.taskForm.value.dueDate),
-        completed: this.formType === "UPDATE" ? this.taskForm.value.completed : false
+        completed: false
       };
 
-      console.log(newTask.id)
-      if (this.formType === 'CREATE') {
-        this.taskService.addTask(newTask);
-      } else {
-        this.taskService.updateTask(newTask);
-      }
-      this.closePanel.emit('SUBMIT');
+      console.log(newTask)
+
+      this.taskService.addTask(newTask).subscribe(() => {
+        this.closePanel.emit('SUBMIT');
+      });
     }
+  }
+
+  handleCancel() {
+    this.closePanel.emit('CANCEL');
   }
 }

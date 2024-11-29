@@ -15,12 +15,12 @@
             <th>Due Date</th>
         </thead>
         <tbody>
-            @for (task of tasks; track task.id) {
+            @for (task of tasks$ | async; track task.id) {
                 <tr>
                     <td>
                         <label class="{{ task.completed? 'completed-task' : '' }}">
                             <input type="checkbox" aria-label="Select task" [checked]="task.completed"
-                            (click)="handleCheckbox(task.id)"/>{{ task.name }}
+                            (click)="handleCheckbox(task)"/>{{ task.name }}
                         </label>
                     </td>
                     <td>
@@ -36,11 +36,14 @@
         </tbody>
     </table>
     <div class="button-container">
-		  <button (click)="showModal = true">Add New Task</button>
+		  <button (click)="handleAddModalOpen()">Add New Task</button>
 	  </div>
-    @if(showModal) {
-      <app-task-form (closePanel)="showModal = false; formType = 'CREATE'"
-      [currentTask]="selectedTask"
-      [formType]="formType"></app-task-form>
+    @if(showAddModal) {
+      <app-task-form (closePanel)="handleModalClose($event)"></app-task-form>
+    }
+    @if(showUpdateModal) {
+      <app-task-form-update
+      [selectedTask]="selectedTask"
+      (closePanel)="handleModalClose($event)"></app-task-form-update>
     }
 </div>
